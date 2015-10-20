@@ -36,7 +36,6 @@ static void usage(void)
 	fprintf(stderr, "SELECTOR := [ not ] [ from PREFIX ] [ to PREFIX ] [ tos TOS ] [ fwmark FWMARK[/MASK] ]\n");
 	fprintf(stderr, "            [ iif STRING ] [ oif STRING ] [ pref NUMBER ]\n");
 	fprintf(stderr, "ACTION := [ table TABLE_ID ]\n");
-	fprintf(stderr, "          [ prohibit | reject | unreachable ]\n");
 	fprintf(stderr, "          [ realms [SRCREALM/]DSTREALM ]\n");
 	fprintf(stderr, "          [ goto NUMBER ]\n");
 	fprintf(stderr, "          SUPPRESSOR\n");
@@ -82,8 +81,9 @@ int print_rule(const struct sockaddr_nl *who, struct nlmsghdr *n, void *arg)
 	if (tb[FRA_SRC]) {
 		if (r->rtm_src_len != host_len) {
 			fprintf(fp, "from %s/%u ", rt_addr_n2a(r->rtm_family,
-							 RTA_DATA(tb[FRA_SRC]),
-							 abuf, sizeof(abuf)),
+						       RTA_PAYLOAD(tb[FRA_SRC]),
+						       RTA_DATA(tb[FRA_SRC]),
+						       abuf, sizeof(abuf)),
 				r->rtm_src_len
 				);
 		} else {
@@ -102,8 +102,9 @@ int print_rule(const struct sockaddr_nl *who, struct nlmsghdr *n, void *arg)
 	if (tb[FRA_DST]) {
 		if (r->rtm_dst_len != host_len) {
 			fprintf(fp, "to %s/%u ", rt_addr_n2a(r->rtm_family,
-							 RTA_DATA(tb[FRA_DST]),
-							 abuf, sizeof(abuf)),
+						       RTA_PAYLOAD(tb[FRA_DST]),
+						       RTA_DATA(tb[FRA_DST]),
+						       abuf, sizeof(abuf)),
 				r->rtm_dst_len
 				);
 		} else {
@@ -378,8 +379,8 @@ static int iprule_modify(int cmd, int argc, char **argv)
 	if (!table_ok && cmd == RTM_NEWRULE)
 		req.r.rtm_table = RT_TABLE_MAIN;
 
-	if (rtnl_talk(&rth, &req.n, 0, 0, NULL) < 0)
-		return 2;
+	if (rtnl_talk(&rth, &req.n, NULL, 0) < 0)
+		return -2;
 
 	return 0;
 }
@@ -405,7 +406,7 @@ static int flush_rule(const struct sockaddr_nl *who, struct nlmsghdr *n, void *a
 		if (rtnl_open(&rth2, 0) < 0)
 			return -1;
 
-		if (rtnl_talk(&rth2, n, 0, 0, NULL) < 0)
+		if (rtnl_talk(&rth2, n, NULL, 0) < 0)
 			return -2;
 
 		rtnl_close(&rth2);
