@@ -1,3 +1,10 @@
+iproute2 (4.2.0~cake-1) unstable; urgency=medium
+
+  * [8c2adf5] Build HTML rather than postscript docs
+  * [a87bbcc] Update debian/control for Cake
+
+ -- Dean Scarff <dos@scarff.id.au>  Wed, 20 Jan 2016 03:38:32 +1100
+
 iproute2 (4.1.1-1) unstable; urgency=medium
 
   * [be9f298] Imported Upstream version 4.1.1
