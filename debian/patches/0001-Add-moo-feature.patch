@@ -6,16 +6,17 @@ Subject: Add moo feature
  ip/ip.c |   15 +++++++++++++++
  1 file changed, 15 insertions(+)
 
---- a/ip/ip.c
-+++ b/ip/ip.c
-@@ -66,6 +66,20 @@
-         return 0;
+Index: pkg-iproute/ip/ip.c
+===================================================================
+--- pkg-iproute.orig/ip/ip.c
++++ pkg-iproute/ip/ip.c
+@@ -68,6 +68,19 @@ static int do_help(int argc, char **argv
+ 	return 0;
  }
  
 +static int do_moo(int argc, char **argv)
 +{
-+	
-+fprintf(stderr,
++	fprintf(stderr,
 +"\n"
 +" _ __ ___   ___   ___\n"
 +"| '_ ` _ \\ / _ \\ / _ \\\n"
@@ -25,15 +26,15 @@ Subject: Add moo feature
 +"P.S. no real cows were harmed for this moo\n");
 +	exit(1);
 +}
-+                       
++ 
  static const struct cmd {
  	const char *cmd;
  	int (*func)(int argc, char **argv);
-@@ -96,6 +110,7 @@
+@@ -98,6 +111,7 @@ static const struct cmd {
  	{ "netns",	do_netns },
  	{ "netconf",	do_ipnetconf },
  	{ "help",	do_help },
-+	{ "moo",	do_moo }, 
++	{ "moo",	do_moo },
  	{ 0 }
  };
  
