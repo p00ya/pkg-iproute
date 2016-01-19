@@ -1,0 +1,13 @@
+Index: pkg-iproute/doc/Makefile
+===================================================================
+--- pkg-iproute.orig/doc/Makefile
++++ pkg-iproute/doc/Makefile
+@@ -19,7 +19,7 @@ DVIFILES=$(subst .ps,.dvi,$(PSFILES))
+ PDFFILES=$(subst .ps,.pdf,$(PSFILES))
+ 
+ 
+-all: pstwocol
++all: html
+ 
+ pstwocol: $(PSFILES)
+ 

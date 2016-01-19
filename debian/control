@@ -7,7 +7,6 @@ Vcs-Browser: http://git.debian.org/?p=collab-maint/pkg-iproute.git
 Vcs-Git: git://git.debian.org/git/collab-maint/pkg-iproute.git
 Standards-Version: 3.9.6
 Build-Depends: bison,
-               cm-super-minimal,
                debhelper (>= 8),
                flex,
                iptables-dev,
@@ -17,10 +16,7 @@ Build-Depends: bison,
                linux-libc-dev,
                linuxdoc-tools,
                lynx | lynx-cur,
-               pkg-config,
-               texlive-fonts-recommended,
-               texlive-latex-base,
-               texlive-latex-recommended
+               pkg-config
 
 Package: iproute2
 Priority: important
