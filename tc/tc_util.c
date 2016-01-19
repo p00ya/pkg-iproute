@@ -130,7 +130,7 @@ ok:
 
 int print_tc_classid(char *buf, int blen, __u32 h)
 {
-	SPRINT_BUF(handle) = {};
+	SPRINT_BUF(handle);
 	int hlen = SPRINT_BSIZE - 1;
 
 	if (h == TC_H_ROOT)
@@ -608,4 +608,3 @@ compat_xstats:
 	if (tb[TCA_XSTATS] && xstats)
 		*xstats = tb[TCA_XSTATS];
 }
-

@@ -268,7 +268,8 @@ enum {
        TCA_GRED_STAB,
        TCA_GRED_DPS,
        TCA_GRED_MAX_P,
-	   __TCA_GRED_MAX,
+       TCA_GRED_LIMIT,
+       __TCA_GRED_MAX,
 };
 
 #define TCA_GRED_MAX (__TCA_GRED_MAX - 1)
@@ -679,6 +680,7 @@ enum {
 	TCA_CODEL_LIMIT,
 	TCA_CODEL_INTERVAL,
 	TCA_CODEL_ECN,
+	TCA_CODEL_CE_THRESHOLD,
 	__TCA_CODEL_MAX
 };
 
@@ -695,6 +697,7 @@ struct tc_codel_xstats {
 	__u32	drop_overlimit; /* number of time max qdisc packet limit was hit */
 	__u32	ecn_mark;  /* number of packets we ECN marked instead of dropped */
 	__u32	dropping;  /* are we in dropping state ? */
+	__u32	ce_mark;   /* number of CE marked packets because of ce_threshold */
 };
 
 /* FQ_CODEL */
@@ -707,6 +710,7 @@ enum {
 	TCA_FQ_CODEL_ECN,
 	TCA_FQ_CODEL_FLOWS,
 	TCA_FQ_CODEL_QUANTUM,
+	TCA_FQ_CODEL_CE_THRESHOLD,
 	__TCA_FQ_CODEL_MAX
 };
 
@@ -730,6 +734,7 @@ struct tc_fq_codel_qd_stats {
 				 */
 	__u32	new_flows_len;	/* count of flows in new list */
 	__u32	old_flows_len;	/* count of flows in old list */
+	__u32	ce_mark;	/* packets above ce_threshold */
 };
 
 struct tc_fq_codel_cl_stats {
@@ -821,6 +826,52 @@ struct tc_hhf_xstats {
 	__u32	hh_cur_count;   /* number of current heavy-hitters */
 };
 
+/* FQ_PIE */
+enum {
+	TCA_FQ_PIE_UNSPEC,
+	TCA_FQ_PIE_TARGET,
+	TCA_FQ_PIE_TUPDATE,
+	TCA_FQ_PIE_ALPHA,
+	TCA_FQ_PIE_BETA,
+	TCA_FQ_PIE_ECN,
+	TCA_FQ_PIE_BYTEMODE,
+	TCA_FQ_PIE_PLIMIT,		/* limit of total number of packets in queue */
+	TCA_FQ_PIE_FLOW_PLIMIT,		/* limit of packets per flow */
+	TCA_FQ_PIE_QUANTUM,		/* RR quantum */
+	TCA_FQ_PIE_INITIAL_QUANTUM,	/* RR quantum for new flow */
+	TCA_FQ_PIE_RATE_ENABLE,		/* enable/disable rate limiting */
+	TCA_FQ_PIE_FLOW_DEFAULT_RATE,	/* obsolete, do not use */
+	TCA_FQ_PIE_FLOW_MAX_RATE,	/* per flow max rate */
+	TCA_FQ_PIE_BUCKETS_LOG,		/* log2(number of buckets) */
+	TCA_FQ_PIE_FLOW_REFILL_DELAY,	/* flow credit refill delay in usec */
+	__TCA_FQ_PIE_MAX
+};
+
+#define TCA_FQ_PIE_MAX	(__TCA_FQ_PIE_MAX - 1)
+
+struct tc_fq_pie_qd_stats {
+	__u32	prob;             /* current probability */
+	__u32	delay;            /* current delay in ms */
+	__u32	avg_dq_rate;      /* current average dq_rate in bits/pie_time */
+	__u32	packets_in;       /* total number of packets enqueued */
+	__u32	dropped;          /* packets dropped due to pie_action */
+	__u32	overlimit;        /* dropped due to lack of space in queue */
+	__u32	maxq;             /* maximum queue size */
+	__u32	ecn_mark;         /* packets marked with ecn*/
+	__u64	gc_flows;
+	__u64	highprio_packets;
+	__u64	tcp_retrans;
+	__u64	throttled;
+	__u64	flows_plimit;
+	__u64	pkts_too_long;
+	__u64	allocation_errors;
+	__s64	time_next_delayed_flow;
+	__u32	flows;
+	__u32	inactive_flows;
+	__u32	throttled_flows;
+	__u32	pad;
+};
+
 /* PIE */
 enum {
 	TCA_PIE_UNSPEC,
@@ -845,4 +896,79 @@ struct tc_pie_xstats {
 	__u32 maxq;             /* maximum queue size */
 	__u32 ecn_mark;         /* packets marked with ecn*/
 };
+
+/* CAKE */
+enum {
+	TCA_CAKE_UNSPEC,
+	TCA_CAKE_BASE_RATE,
+	TCA_CAKE_DIFFSERV_MODE,
+	TCA_CAKE_ATM,
+	TCA_CAKE_FLOW_MODE,
+	TCA_CAKE_OVERHEAD,
+	TCA_CAKE_RTT,
+	TCA_CAKE_TARGET,
+	TCA_CAKE_AUTORATE,
+	TCA_CAKE_MEMORY,
+	TCA_CAKE_WASH,
+	__TCA_CAKE_MAX
+};
+#define TCA_CAKE_MAX	(__TCA_CAKE_MAX - 1)
+
+struct tc_cake_traffic_stats {
+	__u32 packets;
+	__u32 link_ms;
+	__u64 bytes;
+};
+
+#define TC_CAKE_MAX_TINS (8)
+struct tc_cake_xstats {
+	__u16 version;  /* == 3, increments when struct extended */
+	__u8  max_tins; /* == TC_CAKE_MAX_TINS */
+	__u8  tin_cnt;  /* <= TC_CAKE_MAX_TINS */
+
+	__u32 threshold_rate   [TC_CAKE_MAX_TINS];
+	__u32 target_us        [TC_CAKE_MAX_TINS];
+	struct tc_cake_traffic_stats sent      [TC_CAKE_MAX_TINS];
+	struct tc_cake_traffic_stats dropped   [TC_CAKE_MAX_TINS];
+	struct tc_cake_traffic_stats ecn_marked[TC_CAKE_MAX_TINS];
+	struct tc_cake_traffic_stats backlog   [TC_CAKE_MAX_TINS];
+	__u32 interval_us      [TC_CAKE_MAX_TINS];
+	__u32 way_indirect_hits[TC_CAKE_MAX_TINS];
+	__u32 way_misses       [TC_CAKE_MAX_TINS];
+	__u32 way_collisions   [TC_CAKE_MAX_TINS];
+	__u32 peak_delay_us    [TC_CAKE_MAX_TINS]; /* ~= delay to bulk flows */
+	__u32 avge_delay_us    [TC_CAKE_MAX_TINS];
+	__u32 base_delay_us    [TC_CAKE_MAX_TINS]; /* ~= delay to sparse flows */
+	__u16 sparse_flows     [TC_CAKE_MAX_TINS];
+	__u16 bulk_flows       [TC_CAKE_MAX_TINS];
+	__u32 last_skblen      [TC_CAKE_MAX_TINS]; /* skb_headlen */
+	__u32 max_skblen       [TC_CAKE_MAX_TINS];
+	__u32 capacity_estimate;  /* version 2 */
+	__u32 memory_limit;       /* version 3 */
+	__u32 memory_used;        /* version 3 */
+};
+
+struct tc_cake_old_xstats {
+	__u16 type;  /* constant magic 0xCAFE */
+	__u16 class_cnt;
+	struct {
+		__u32 rate;
+		__u32 target_us;
+		__u32 packets;
+		__u32 interval_us;
+		__u64 bytes;
+		__u32 dropped;
+		__u32 ecn_marked;
+		__u32 way_indirect_hits;
+		__u32 way_misses;
+		__u32 way_collisions;
+		__u32 backlog_bytes;
+		__u32 peak_delay; /* delay to fat flows */
+		__u32 avge_delay;
+		__u32 base_delay; /* delay to sparse flows */
+		__u16 sparse_flows;
+		__u16 bulk_flows;
+	} cls[8];
+};
+
 #endif
